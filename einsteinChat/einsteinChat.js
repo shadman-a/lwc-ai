@@ -1,4 +1,5 @@
 import { LightningElement, track } from 'lwc';
+import sendMessage from '@salesforce/apex/EinsteinChatController.sendMessage';
 
 export default class EinsteinChat extends LightningElement {
     @track currentMessage = '';
@@ -10,8 +11,17 @@ export default class EinsteinChat extends LightningElement {
 
     handleSend() {
         if (this.currentMessage) {
-            this.messages = [...this.messages, this.currentMessage];
+            const userMessage = this.currentMessage;
+            this.messages = [...this.messages, userMessage];
             this.currentMessage = '';
+            sendMessage({ prompt: userMessage })
+                .then((response) => {
+                    this.messages = [...this.messages, response];
+                })
+                .catch((error) => {
+                    // eslint-disable-next-line no-console
+                    console.error('Error from Einstein AI', error);
+                });
         }
     }
 }
